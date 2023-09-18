@@ -1,28 +1,38 @@
 #!/bin/bash
 
 _help() {
-    echo "Usage: $0 [options]"
+    echo "Usage: shell-config-install.sh [options]"
     echo "Configure the shell environment to the default for BaxHugh"
     echo "Options:"
-    echo "-y	Install BaxHughBin to ~/.bin without asking"
-    echo "-n	Don't install BaxHughBin to ~/.bin"
-    echo "-h	Display this help message"
+    echo "  -y,             Install BaxHughBin to ~/.bin without asking"
+    echo "  -n,             Don't install BaxHughBin to ~/.bin"
+    echo "  --no-backup,    Don't backup existing files"
+    echo "  -h, --help,     Display this help message"
 }
 
-while getopts "hyn" arg; do
-    case $arg in
-        h) # display Help
-            _help
-        	exit;;
-      	y)
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -y)
             _YES=1
-            ;;
-      	n)
+            shift
+        ;;
+        -n)
             _NO=1
-            ;;
-      	\j?) # Invalid arg
-         	echo "Error: Invalid arg"
-         	exit;;
+            shift
+        ;;
+        --no-backup)
+            _NO_BACKUP=1
+            shift
+        ;;
+        -h|--help)
+            _help
+            exit 0
+        ;;
+        *)
+            echo "Unknown option: $1"
+            _help
+            exit 1
+        ;;
     esac
 done
 
@@ -36,9 +46,7 @@ append_sourcing_to_file() {
     local FILE=$1
     local SOURCE_TARGET=$2
     local MARKER_COMMENT=">>> shell config script $SOURCE_TARGET >>>"
-    if grep -q "$MARKER_COMMENT" $FILE; then
-        echo "$SOURCE_TARGET is already sourced in $FILE"
-    else
+    if ! grep -q "$MARKER_COMMENT" $FILE; then
         echo "Appending sourcing of ~/$SOURCE_TARGET to $FILE"
         echo "
 # $MARKER_COMMENT
@@ -52,6 +60,12 @@ fi
 
 download_home_file_from_github() {
     local URL=https://raw.githubusercontent.com/BaxHugh/BaxHughConfig/main/home/$(basename $1)
+    if [[ -z $_NO_BACKUP ]]; then
+        echo "Writing $HOME/$1 - original backed up to $HOME/$1~"
+        cp $HOME/$1 $HOME/$1~ > /dev/null 2>&1
+    else
+        echo "Writing $HOME/$1"
+    fi
     curl -fsSL $URL > $HOME/$1 \
         || _warn "Failed to download $URL"
 }
@@ -95,7 +109,7 @@ sed -i 's/'"ZSH_THEME=\".*\""'/ZSH_THEME="'$ZSH_THEME_NAME'"/g' $HOME/.zshrc
 if [[ ! -z $_YES ]]; then
     echo "Cloning BaxHughBin to ~/.bin"
     git clone https://github.com/BaxHugh/BaxHughBin.git ~/.bin
-if [[ ! -z $_NO ]]; then
+elif [[ ! -z $_NO ]]; then
     mkdir ~/.bin > /dev/null 2>&1
 else
     echo "Do you want to install BaxHughBin.git to ~/.bin ? (y/n)"
