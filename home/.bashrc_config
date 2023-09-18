@@ -1,0 +1,32 @@
+# PS1 Command prompt
+DEFAULT="\[\e[39m\]"
+GIT_STATE="\$(__git_ps1)"
+RED="\[\e[0;31m\]"
+GREEN="\[\e[0;32m\]"
+YELLOW="\[\e[0;33m\]"
+BLUE="\[\e[0;34m\]"
+PURPLE="\[\e[0;35m\]"
+CYAN="\[\e[0;36m\]"
+GREY="\[\e[0;37m\]"
+_COLOUR="\[\e[m\]"
+BOLD="\[\e[1m\]"
+_BOLD="\[\e[21m\]"
+ITALIC="\[\e[3m\]"
+DIM="\[\e[2m\]"
+_DIM="\[\e[22m\]"
+BLINK="\[\e[5m\]"
+_BLINK="\[\e[25m\]"
+RESET="\[\e[0m\]"
+
+PS1="${debian_chroot:+($debian_chroot)}${GREEN}╔[\u${DEFAULT}:${BLUE}${BOLD}\w${RESET}:${CYAN}${GIT_STATE}\
+\n${GREEN}╚═[${RESET}"
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+	PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\h: \a\]$PS1"    ;;
+*)
+	;;
+esac
+
+export PS1

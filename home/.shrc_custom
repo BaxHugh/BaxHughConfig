@@ -1,0 +1,187 @@
+# My custom stuff
+
+# aliases
+alias c="code"
+alias n="nano"
+alias g="gedit"
+alias xo="xdg-open"
+alias do-update="echo apt update -y; sudo apt update -y; echo; echo apt upgrade -y; sudo apt upgrade -y; echo; echo apt autoremove; sudo apt autoremove"
+alias grep="grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} --exclude-dir={__pycache__,.venv,.pytest_cache,.mypy_cache,.ruff_cache}"
+
+# More involved aliases
+# For Wayland X11 aliases to work, uncomment the WaylandEnable line in /etc/gdm3/custom.conf
+alias useWayland="sudo sed -i 's/WaylandEnable=false/WaylandEnable=true/' /etc/gdm3/custom.conf"
+alias useX11="sudo sed -i 's/WaylandEnable=true/WaylandEnable=false/' /etc/gdm3/custom.conf"
+alias restartgdm="sudo systemctl restart gdm"
+alias touchcursor-restart="systemctl --user restart touchcursor.service"
+alias tcr="touchcursor-restart"
+
+alias perf-set-scope0="echo 0 | sudo tee /proc/sys/kernel/kptr_restrict; echo 0 | sudo tee /proc/sys/kernel/perf_event_paranoid"
+alias ptrace-scope1="echo 1 | sudo tee /proc/sys/kernel/yama/ptrace_scope"
+alias socat-virtual-serial-device="socat -d -d pty,raw,echo=0 pty,raw,echo=0"
+# Then can monitor / write to /dev/pts/5 /dev/pts/6 for example
+
+# Functions
+function backup() {
+	cp -r $1 $1~
+}
+
+function _true_false_toggle() {
+	GSETTINGS_PATH=$1
+	if $(eval "gsettings get $GSETTINGS_PATH"); then
+		eval "gsettings set $GSETTINGS_PATH false"
+		echo "set to false"
+	else
+		eval "gsettings set $GSETTINGS_PATH true"
+		echo "set to true"
+	fi
+}
+
+function night-light-toggle() {
+	_true_false_toggle "org.gnome.settings-daemon.plugins.color night-light-enabled"
+}
+
+function workspace-only-on-primary-toggle() {
+	_true_false_toggle "org.gnome.mutter workspaces-only-on-primary"
+}
+
+function blur-applications-toggle() {
+	_true_false_toggle "org.gnome.shell.extensions.blur-my-shell.applications blur"
+}
+
+function set-text-scaling-factor() {
+	gsettings set org.gnome.desktop.interface text-scaling-factor $1
+}
+function get-text-scaling-factor() {
+	gsettings get org.gnome.desktop.interface text-scaling-factor $1
+}
+
+function dark-theme-toggle() {
+	eval BASE_THEME=$(gsettings get org.gnome.desktop.interface gtk-theme)
+	if [[ $BASE_THEME == *"dark"* ]]; then
+		BASE_THEME=${BASE_THEME%"-dark"}
+	fi
+	echo "Found base theme: $BASE_THEME"
+
+	CURR_SETTING=$(gsettings get org.gnome.desktop.interface color-scheme)
+
+	if [[ $CURR_SETTING == *"dark"* ]]; then
+		NEW_SETTING="prefer-light"
+		SUFFIX=""
+	else
+		NEW_SETTING="prefer-dark"
+		SUFFIX="-dark"
+	fi
+
+	gsettings set org.gnome.desktop.interface color-scheme $NEW_SETTING
+	gsettings set org.gnome.desktop.interface gtk-theme $BASE_THEME$SUFFIX
+	gsettings set org.gnome.desktop.interface icon-theme $BASE_THEME$SUFFIX
+	gsettings set org.gnome.shell.extensions.user-theme name $BASE_THEME$SUFFIX
+}
+
+function lower() {
+	echo $(echo $@ | tr '[:upper:]' '[:lower:]')
+}
+
+function upper() {
+	echo $(echo $@ | tr '[:lower:]' '[:upper:]')
+}
+
+function poetry-remove-current-env() {
+	poetry env\ remove $(poetry env\ list | head -n1 | awk '{print $1;}')
+}
+
+function cmd-for-file-from-grep() {
+	CMD=$1
+	GREP_STATEMENT=$2
+	$CMD $($GREP_STATEMENT | head -1 | awk '{print $1}' | grep -o -P ".*(?=:)")
+}
+function code-from-grep() {
+	cmd-for-file-from-grep code "$1"
+}
+
+function time-diff() {
+    python3 -c \
+"h, m = [en - st for st, en in zip([int(v) for v in ('$1'.split('.'))], [int(v) for v in ('$2'.split('.'))])]
+if m < 0:
+    h = h - 1
+    m = 60 + m
+print(f'{h}h{m}m')"
+}
+alias tmd="time-diff"
+
+function copy-to-clipboard() {
+    echo -n $@ | xclip -selection clipboard
+}
+function copy-to-clipboard-x() {
+    echo -n $($@) | xclip -selection clipboard
+}
+alias cbcp="copy-to-clipboard"
+alias cbcpx="copy-to-clipboard-x"
+
+function git-open-in-browser() {
+	xdg-open $(git remote get-url origin | sed 's/:/\//' | sed 's/git@/https:\/\//' | sed 's/\.git//')
+}
+alias gitopen-in-browser="git-open-in-browser"
+
+function git-push-set-upstream() {
+	git push --set-upstream origin $(git branch --show-current)
+}
+alias gitpush-set-upstream="git-push-set-upstream"
+
+function git-scha-from-grep() {
+	git log | grep $@ -B6 | grep commit | awk '{print $2}'
+}
+alias gitscha-from-grep="git-scha-from-grep"
+
+function git-branch-local-not-in-remote() {
+	git branch -r | grep -v origin/HEAD | sed 's#origin/##' > /tmp/git-branch-r
+	git branch | sed 's/*/ /' > /tmp/git-branch-local
+	diff /tmp/git-branch-r /tmp/git-branch-local | grep '^>' | sed 's/^>\ //'
+}
+alias gitbranch-local-not-in-remote="git-branch-local-not-in-remote"
+
+function docker-top-container() {
+	# Return the CONTAINER ID of the top-most container 
+	docker container ls | grep -o -E '^[0-9,a-z]+' | head -1
+}
+
+function docker-configure-shell() {
+	CONTAINER=$1
+	USER=$2
+	if [ -z $USER ]; then
+		CONTAINER_HOME=/root
+	else
+		CONTAINER_HOME=/home/$USER
+	fi
+
+	FILES=("HOME/.shrc_custom" "HOME/.zshrc_config" "HOME/.bashrc_config" "HOME/.nanorc" "HOME/.inputrc" "HOME/.zsh_history")
+	for file in ${FILES[@]}; do
+		HOST_FILE=$(echo $file | sed "s#HOME#$HOME#")
+		CONTAINERS_FILE_PATH=$(echo $file | sed "s#HOME#$CONTAINER_HOME#")
+		CONTAINER_FILE=$CONTAINER:$CONTAINERS_FILE_PATH
+		# echo docker cp $HOST_FILE $CONTAINER_FILE
+		docker cp $HOST_FILE $CONTAINER_FILE > /dev/null
+		# Change ownership to the docker's user
+		if [ ! -z $USER ]; then
+			docker exec --user root $CONTAINER sh -c "chown $USER:$USER $CONTAINERS_FILE_PATH"
+		fi
+	done
+}
+
+function diff-dirs-names-only() {
+	# Don't override existing tmp file so can be used in parallel
+	TMP_FILE0=/tmp/.diff-dirs
+	TMP_FILE=$TMP_FILE0
+	cnt=0
+	while [ -f $TMP_FILE ]; do
+		cnt=$(($cnt + 1))
+		TMP_FILE=$TMP_FILE0$cnt
+	done
+	# Could use -type d for dirs only, -type f for normal files only
+	find $2 -printf "%P\n" | sort > $TMP_FILE
+	find $1 -printf "%P\n" | sort | diff --color - $TMP_FILE
+}
+
+
+

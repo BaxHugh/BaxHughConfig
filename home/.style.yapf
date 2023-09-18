@@ -1,0 +1,18 @@
+[style]
+align_closing_bracket_with_visual_indent = true
+blank_line_before_nested_class_or_def = true
+coalesce_brackets = false
+column_limit = 120
+dedent_closing_brackets = true
+disable_ending_comma_heuristic = false
+each_dict_entry_on_separate_line = true
+force_multiline_dict = false
+indent_dictionary_value = true
+indent_blank_lines = false
+split_before_dict_set_generator = true
+split_complex_comprehension = true
+split_before_arithmetic_operator = true
+split_before_bitwise_operator = true
+split_before_logical_operator = true
+split_before_dot = true
+split_before_expression_after_opening_paren = true

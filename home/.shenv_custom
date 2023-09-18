@@ -1,0 +1,19 @@
+
+if [ -d ~/.bin ]; then
+    export PATH="$HOME/.bin:${PATH}"
+fi
+if [ -d ~/.local/bin ]; then
+    export PATH="$HOME/.local/bin:${PATH}"
+fi
+# # NX commands for nomachine cli
+# if [ -d /usr/NX/bin ]; then
+#     PATH="/usr/NX/bin:${PATH}"
+# fi
+
+ZSH_PLUGINS=(git)
+for file in ${ZSH_CUSTOM:=$HOME/.oh-my-zsh/custom}/plugins/*; do
+    if [ $(basename $file) = "example" ]; then
+        continue
+    fi
+    ZSH_PLUGINS+=($(basename $file))
+done

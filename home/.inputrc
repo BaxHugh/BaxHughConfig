@@ -1,0 +1,18 @@
+# mappings for Ctrl-backspace and Ctrl-delete to delete words
+"\C-h": backward-kill-word
+"\e[3;5~": kill-word
+
+# alternate mappings for "up" and "down" to search the history
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# alternate mappings for "page up" and "page down" to go to previous and next commands in history
+"\e[5~": previous-history
+"\e[6~": next-history
+
+# alternate mappings for "alt up" and "alt down" to go to previous and next commands in history
+"\e[1;3A": previous-history
+"\e[1;3B": next-history
+
+# turn off the bell sounds
+set bell-style none

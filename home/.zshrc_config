@@ -1,0 +1,22 @@
+# My custom stuff
+
+# zsh keybindings (equivalent of ~/.inputrc for bash
+# mappings for Ctrl-backspace to delete word
+bindkey -M emacs '^H' backward-kill-word
+# alternate mappings for "alt up" and "alt down" to go to previous and next commands in history
+bindkey -M emacs '^[[1;3A' up-history
+bindkey -M emacs '^[[1;3B' down-history
+
+# Turn off bell sournd
+unsetopt BEEP
+
+# Resourcing for when in environments
+alias scz="source ~/.zshrc"
+if [[ -f /etc/zsh_command_not_found ]]; then
+    . /etc/zsh_command_not_found
+fi
+
+# This stops ls highlighting directories in symbolic links
+# Which makes them hard to read
+LS_COLORS=$LS_COLORS:'ow=1;34:'
+export LS_COLORS
