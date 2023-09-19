@@ -139,7 +139,9 @@ download_and_append_sourcing_to_file $HOME/.bashrc .bashrc_config
 download_and_append_sourcing_to_file $HOME/.bashrc .shrc_custom
 
 append_sourcing_to_file $HOME/.zshrc .shrc_custom_local
+append_sourcing_to_file $HOME/.zshenv .shenv_custom_local
 append_sourcing_to_file $HOME/.bashrc .shrc_custom_local
+append_sourcing_to_file $HOME/.profile .shenv_custom_local
 
 cp ~/.inputrc ~/.inputrc~
 echo "Original ~/.inputrc backed up to ~/.inputrc~"
