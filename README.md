@@ -4,16 +4,18 @@ And package installation script to quickly install the packages I need (using ap
 
 # Shell Config Installation
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BaxHugh/BaxHughConfig/main/shell-config-install.sh | bash -s 
+curl -fsSL https://raw.githubusercontent.com/BaxHugh/BaxHughConfig/main/shell-config-install.sh | bash -s --install-zsh
 ```
 See `shell-config-install.sh --help` for more options.
 ```
 Usage: shell-config-install.sh [options]
 Configure the shell environment to the default for BaxHugh
 Options:
--y	Install BaxHughBin to ~/.bin without asking
--n	Don't install BaxHughBin to ~/.bin
--h	Display this help message
+  --no-backup,              Don't backup existing files
+  --install-zsh             Install zsh (and oh-my-zsh) if not already installed
+  --install-baxhugh-bin,    Install BaxHughBin to ~/.bin
+  --unattended,             Answer no to any prompts
+  -h, --help,               Display this help message
 ```
 
 # Package Installation
