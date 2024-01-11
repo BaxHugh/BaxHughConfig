@@ -184,4 +184,36 @@ function diff-dirs-names-only() {
 }
 
 
+function install-completions-for() {
+	local CMD=$1
+	shift
+	local COMPLETION_GEN_CMD=$@
 
+	_omyzsh_is_installed() {
+		[[ -d $HOME/.oh-my-zsh ]]
+	}
+
+	_plugins_directory() {
+    echo ${ZSH_CUSTOM:=$HOME/.oh-my-zsh/custom}/plugins
+}
+
+	_install_omzsh_completions_from_file_or_dir() {
+		local PLUGIN_NAME=$1
+		local COMPLETION_FILE_OR_DIR=$2
+		if _omyzsh_is_installed; then
+			local target=$(_plugins_directory)/$PLUGIN_NAME
+			rm -rf $target 2> /dev/null
+			if [ -f $COMPLETION_FILE_OR_DIR ]; then
+				mkdir $target 2> /dev/null
+				local target=$target/_$PLUGIN_NAME
+			fi
+			mv $COMPLETION_FILE_OR_DIR $target \
+				&& echo "To enable the $PLUGIN_NAME completions plugin add '$PLUGIN_NAME' to the plugins variable found in ~/.zshrc" \
+				|| (echo "Failed to install $PLUGIN_NAME completions"; exit 1) || return 1
+		fi
+	}
+
+	eval "$COMPLETION_GEN_CMD" > /tmp/completion || (echo "Failed to generate completions"; exit 1) || return 1
+
+	_install_omzsh_completions_from_file_or_dir $CMD /tmp/completion
+}
