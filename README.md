@@ -11,7 +11,7 @@ I.e. adding specific directories to their path.
 # Shell Config Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BaxHugh/BaxHughConfig/main/shell-config-install.sh | bash -s --install-zsh
+curl -fsSL https://raw.githubusercontent.com/BaxHugh/BaxHughConfig/main/shell-config-install.sh | bash -s - --install-zsh
 ```
 See `shell-config-install.sh --help` for more options.
 ```
