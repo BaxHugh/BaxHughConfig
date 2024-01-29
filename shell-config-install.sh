@@ -191,7 +191,7 @@ if _omzsh_is_installed; then
     if _on_wsl; then
         MARKER_COMMENT=">>> shell config script wsl >>>"
         if ! grep -q "$MARKER_COMMENT" $HOME/.zshenv; then
-            echo "Setting NO_GIT_PROMPT=1 in ~/.zshenv"
+            echo "Setting NO_GIT_PROMPT=1 in ~/.zshenv due to being on WSL"
             echo "# $MARKER_COMMENT" >> ~/.zshenv
             echo "# Git status is slow in WSL2 because of slow cross-os file system performance" >> ~/.zshenv
             echo "# https://github.com/microsoft/WSL/issues/4401" >> ~/.zshenv
