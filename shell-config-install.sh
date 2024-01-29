@@ -183,8 +183,6 @@ append_sourcing_to_file $HOME/.zshenv .shenv_custom_local
 append_sourcing_to_file $HOME/.bashrc .shrc_custom_local
 append_sourcing_to_file $HOME/.profile .shenv_custom_local
 
-cp ~/.inputrc ~/.inputrc~
-echo "Original ~/.inputrc backed up to ~/.inputrc~"
 download_home_file_from_github .inputrc
 download_home_file_from_github .nanorc
 download_home_file_from_github .style.yapf
