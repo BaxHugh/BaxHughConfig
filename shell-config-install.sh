@@ -8,6 +8,11 @@ _omzsh_is_installed() {
     [[ -d ${ZSH:=$HOME/.oh-my-zsh} ]]
 }
 
+_on_wsl() {
+    # look for presence of /etc/wsl.conf
+    [[ -f /etc/wsl.conf ]]
+}
+
 _help() {
     echo "Usage: shell-config-install.sh [options]"
     echo "Configure the shell environment to the default used by BaxHugh"
@@ -185,6 +190,17 @@ download_home_file_from_github .nanorc
 download_home_file_from_github .style.yapf
 
 if _omzsh_is_installed; then
+    if _on_wsl; then
+        MARKER_COMMENT=">>> shell config script wsl >>>"
+        if ! grep -q "$MARKER_COMMENT" $HOME/.zshenv; then
+            echo "Setting NO_GIT_PROMPT=1 in ~/.zshenv"
+            echo "# $MARKER_COMMENT" >> ~/.zshenv
+            echo "# Git status is slow in WSL2 because of slow cross-os file system performance" >> ~/.zshenv
+            echo "# https://github.com/microsoft/WSL/issues/4401" >> ~/.zshenv
+            echo "export NO_GIT_PROMPT=1" >> ~/.zshenv
+            echo "# <<< shell config script wsl <<<" >> ~/.zshenv
+        fi
+    fi
     ZSH_THEME_NAME="frobick"
     curl -fsSL https://gist.githubusercontent.com/BaxHugh/ea7e016660a58eac4c349a9d8cdd711f/raw/$ZSH_THEME_NAME.zsh-theme > ${ZSH_CUSTOM:=$HOME/.oh-my-zsh/custom}/themes/$ZSH_THEME_NAME.zsh-theme \
         && (
