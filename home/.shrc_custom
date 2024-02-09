@@ -141,6 +141,15 @@ function git-branch-local-not-in-remote() {
 }
 alias gitbranch-local-not-in-remote="git-branch-local-not-in-remote"
 
+function git-checkout-all-remotes() {
+	# origin or $1 if set
+	local REMOTE=${1:-origin}
+	local CURRENT_BRANCH=$(git branch --show-current)
+	git fetch --all
+	git branch -r | grep -v origin/HEAD | sed 's#origin/##' | xargs -I {} git checkout -b {} $REMOTE/{}
+	git checkout $CURRENT_BRANCH
+}
+
 function docker-top-container() {
 	# Return the CONTAINER ID of the top-most container 
 	docker container ls | grep -o -E '^[0-9,a-z]+' | head -1
