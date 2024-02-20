@@ -136,6 +136,10 @@ _this_get_group_decoding() {
     echo heif-gdk-pixbuf heif-thumbnailer
 }
 
+_this_get_group_iphone-backup() {
+    echo libimobiledevice6 libimobiledevice-utils ifuse
+}
+
 _this_get_group_cli-dev() {
     echo "noapm"
 }
