@@ -120,7 +120,8 @@ alias cbcp="copy-to-clipboard"
 alias cbcpx="copy-to-clipboard-x"
 
 function git-open-in-browser() {
-	xdg-open $(git remote get-url origin | sed 's/:/\//' | sed 's/git@/https:\/\//' | sed 's/\.git//')
+	local PAGE=$1 # i.e. "pulls" or "issues"
+	xdg-open $(git remote get-url origin | sed 's/:/\//' | sed 's/git@/https:\/\//' | sed 's/\.git//')/$PAGE
 }
 alias gitopen-in-browser="git-open-in-browser"
 
