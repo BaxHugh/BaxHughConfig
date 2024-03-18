@@ -227,3 +227,23 @@ function install-completions-for() {
 
 	_install_omzsh_completions_from_file_or_dir $CMD /tmp/completion
 }
+
+function rust-sandbox() {
+	local ARG="${1:-new}"
+
+	if [[ $ARG == "new" ]] then
+		local SANDBOX_DIR=/tmp/rust-sandbox-$(uuidgen | cut -c 1-8)
+		cargo new --quiet --vcs=none $SANDBOX_DIR && \
+			code --new-window $SANDBOX_DIR && \
+			code --reuse-window $SANDBOX_DIR/src/main.rs
+
+	elif [[ $ARG == "clear" ]] then
+		echo Removing directories:
+		ls -A1 /tmp/ | grep -i 'rust-sandbox-' --color=never
+		rm -rf /tmp/rust-sandbox-*
+
+	elif [[ $ARG == "help" || $ARG == "--help" ]] then
+		echo "Usage: $funcstack[1] [new | clear ]"
+		echo "Default is new"
+	fi
+}
