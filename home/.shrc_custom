@@ -5,7 +5,7 @@ alias c="code"
 alias n="nano"
 alias g="gedit"
 alias xo="xdg-open"
-alias do-update="echo apt update -y; sudo apt update -y; echo; echo apt upgrade -y; sudo apt upgrade -y; echo; echo apt autoremove; sudo apt autoremove"
+alias do-update="echo apt update -y; sudo apt update -y; echo; echo apt upgrade -y; sudo apt upgrade -y; echo; echo apt autoremove -y; sudo apt autoremove -y"
 alias grep="grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox} --exclude-dir={__pycache__,.venv,.pytest_cache,.mypy_cache,.ruff_cache}"
 
 # More involved aliases
