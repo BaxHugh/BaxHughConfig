@@ -130,6 +130,12 @@ function git-push-set-upstream() {
 }
 alias gitpush-set-upstream="git-push-set-upstream"
 
+function git-pr-in-browser() {
+	xdg-open $(git remote get-url origin | sed 's/:/\//' | sed 's/git@/https:\/\//' | sed 's/\.git//')/pull/new/$(git branch --show-current)
+
+}
+alias git-pr="git-pr-in-browser"
+
 function git-scha-from-grep() {
 	git log | grep $@ -B6 | grep commit | awk '{print $2}'
 }
