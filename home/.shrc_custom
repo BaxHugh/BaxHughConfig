@@ -23,7 +23,13 @@ alias socat-virtual-serial-device="socat -d -d pty,raw,echo=0 pty,raw,echo=0"
 
 # Functions
 function backup() {
-	cp -r $1 $1~
+	# 'backup foo' to copy to foo~
+	# or 'backup -m foo' to move to foo~
+	if [[ "$1" == "-m" ]]; then
+		mv $2 $2~
+	else
+		cp -r $1 $1~
+	fi
 }
 
 function _true_false_toggle() {
