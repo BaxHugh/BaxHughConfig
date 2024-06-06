@@ -107,8 +107,10 @@ function code-from-grep() {
 }
 
 function time-diff() {
+	local FROM=$1
+	local TO=${2:-$(date +"%H.%M")}
     python3 -c \
-"h, m = [en - st for st, en in zip([int(v) for v in ('$1'.split('.'))], [int(v) for v in ('$2'.split('.'))])]
+"h, m = [en - st for st, en in zip([int(v) for v in ('$FROM'.split('.'))], [int(v) for v in ('$TO'.split('.'))])]
 if m < 0:
     h = h - 1
     m = 60 + m
