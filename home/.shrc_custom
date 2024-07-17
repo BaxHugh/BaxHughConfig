@@ -21,17 +21,8 @@ alias ptrace-scope1="echo 1 | sudo tee /proc/sys/kernel/yama/ptrace_scope"
 alias socat-virtual-serial-device="socat -d -d pty,raw,echo=0 pty,raw,echo=0"
 # Then can monitor / write to /dev/pts/5 /dev/pts/6 for example
 
-# Functions
-function backup() {
-	# 'backup foo' to copy to foo~
-	# or 'backup -m foo' to move to foo~
-	if [[ "$1" == "-m" ]]; then
-		mv $2 $2~
-	else
-		cp -r $1 $1~
-	fi
-}
-
+# GNOME
+# ====================================================
 function _true_false_toggle() {
 	GSETTINGS_PATH=$1
 	if $(eval "gsettings get $GSETTINGS_PATH"); then
@@ -85,6 +76,11 @@ function dark-theme-toggle() {
 	gsettings set org.gnome.shell.extensions.user-theme name $BASE_THEME$SUFFIX
 }
 
+# ====================================================
+
+# UTILS
+# ====================================================
+
 function lower() {
 	echo $(echo $@ | tr '[:upper:]' '[:lower:]')
 }
@@ -93,9 +89,24 @@ function upper() {
 	echo $(echo $@ | tr '[:lower:]' '[:upper:]')
 }
 
-function poetry-remove-current-env() {
-	poetry env\ remove $(poetry env\ list | head -n1 | awk '{print $1;}')
+function backup() {
+	# 'backup foo' to copy to foo~
+	# or 'backup -m foo' to move to foo~
+	if [[ "$1" == "-m" ]]; then
+		mv $2 $2~
+	else
+		cp -r $1 $1~
+	fi
 }
+
+function copy-to-clipboard() {
+    echo -n $@ | xclip -selection clipboard
+}
+function copy-to-clipboard-x() {
+    echo -n $($@) | xclip -selection clipboard
+}
+alias cbcp="copy-to-clipboard"
+alias cbcpx="copy-to-clipboard-x"
 
 function cmd-for-file-from-grep() {
 	CMD=$1
@@ -118,15 +129,24 @@ print(f'{h}h{m}m')"
 }
 alias tmd="time-diff"
 
-function copy-to-clipboard() {
-    echo -n $@ | xclip -selection clipboard
+function diff-dirs-names-only() {
+	# Don't override existing tmp file so can be used in parallel
+	TMP_FILE0=/tmp/.diff-dirs
+	TMP_FILE=$TMP_FILE0
+	cnt=0
+	while [ -f $TMP_FILE ]; do
+		cnt=$(($cnt + 1))
+		TMP_FILE=$TMP_FILE0$cnt
+	done
+	# Could use -type d for dirs only, -type f for normal files only
+	find $2 -printf "%P\n" | sort > $TMP_FILE
+	find $1 -printf "%P\n" | sort | diff --color - $TMP_FILE
 }
-function copy-to-clipboard-x() {
-    echo -n $($@) | xclip -selection clipboard
-}
-alias cbcp="copy-to-clipboard"
-alias cbcpx="copy-to-clipboard-x"
 
+# ====================================================
+
+# GIT
+# ====================================================
 function git-open-in-browser() {
 	local PAGE=$1 # i.e. "pulls" or "issues"
 	xdg-open $(git remote get-url origin | sed 's/:/\//' | sed 's/git@/https:\/\//' | sed 's/\.git//')/$PAGE
@@ -164,50 +184,11 @@ function git-checkout-all-remotes() {
 	git branch -r | grep -v origin/HEAD | sed 's#origin/##' | xargs -I {} git checkout -b {} $REMOTE/{}
 	git checkout $CURRENT_BRANCH
 }
-
-function docker-top-container() {
-	# Return the CONTAINER ID of the top-most container 
-	docker container ls | grep -o -E '^[0-9,a-z]+' | head -1
-}
-
-function docker-configure-shell() {
-	CONTAINER=$1
-	USER=$2
-	if [ -z $USER ]; then
-		CONTAINER_HOME=/root
-	else
-		CONTAINER_HOME=/home/$USER
-	fi
-
-	FILES=("HOME/.shrc_custom" "HOME/.zshrc_config" "HOME/.bashrc_config" "HOME/.nanorc" "HOME/.inputrc" "HOME/.zsh_history")
-	for file in ${FILES[@]}; do
-		HOST_FILE=$(echo $file | sed "s#HOME#$HOME#")
-		CONTAINERS_FILE_PATH=$(echo $file | sed "s#HOME#$CONTAINER_HOME#")
-		CONTAINER_FILE=$CONTAINER:$CONTAINERS_FILE_PATH
-		# echo docker cp $HOST_FILE $CONTAINER_FILE
-		docker cp $HOST_FILE $CONTAINER_FILE > /dev/null
-		# Change ownership to the docker's user
-		if [ ! -z $USER ]; then
-			docker exec --user root $CONTAINER sh -c "chown $USER:$USER $CONTAINERS_FILE_PATH"
-		fi
-	done
-}
-
-function diff-dirs-names-only() {
-	# Don't override existing tmp file so can be used in parallel
-	TMP_FILE0=/tmp/.diff-dirs
-	TMP_FILE=$TMP_FILE0
-	cnt=0
-	while [ -f $TMP_FILE ]; do
-		cnt=$(($cnt + 1))
-		TMP_FILE=$TMP_FILE0$cnt
-	done
-	# Could use -type d for dirs only, -type f for normal files only
-	find $2 -printf "%P\n" | sort > $TMP_FILE
-	find $1 -printf "%P\n" | sort | diff --color - $TMP_FILE
-}
+# ====================================================
 
 
+# SHELL MANAGEMENT
+# ====================================================
 function install-completions-for() {
 	local CMD=$1
 	shift
@@ -241,6 +222,42 @@ function install-completions-for() {
 
 	_install_omzsh_completions_from_file_or_dir $CMD /tmp/completion
 }
+# ====================================================
+
+# DEV STUFF
+# ====================================================
+
+function docker-top-container() {
+	# Return the CONTAINER ID of the top-most container 
+	docker container ls | grep -o -E '^[0-9,a-z]+' | head -1
+}
+
+function docker-configure-shell() {
+	CONTAINER=$1
+	USER=$2
+	if [ -z $USER ]; then
+		CONTAINER_HOME=/root
+	else
+		CONTAINER_HOME=/home/$USER
+	fi
+
+	FILES=("HOME/.shrc_custom" "HOME/.zshrc_config" "HOME/.bashrc_config" "HOME/.nanorc" "HOME/.inputrc" "HOME/.zsh_history")
+	for file in ${FILES[@]}; do
+		HOST_FILE=$(echo $file | sed "s#HOME#$HOME#")
+		CONTAINERS_FILE_PATH=$(echo $file | sed "s#HOME#$CONTAINER_HOME#")
+		CONTAINER_FILE=$CONTAINER:$CONTAINERS_FILE_PATH
+		# echo docker cp $HOST_FILE $CONTAINER_FILE
+		docker cp $HOST_FILE $CONTAINER_FILE > /dev/null
+		# Change ownership to the docker's user
+		if [ ! -z $USER ]; then
+			docker exec --user root $CONTAINER sh -c "chown $USER:$USER $CONTAINERS_FILE_PATH"
+		fi
+	done
+}
+
+function poetry-remove-current-env() {
+	poetry env\ remove $(poetry env\ list | head -n1 | awk '{print $1;}')
+}
 
 function rust-sandbox() {
 	local ARG="${1:-new}"
@@ -261,3 +278,4 @@ function rust-sandbox() {
 		echo "Default is new"
 	fi
 }
+# ====================================================
