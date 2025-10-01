@@ -278,4 +278,72 @@ function rust-sandbox() {
 		echo "Default is new"
 	fi
 }
+
+# uv managed virtual envs helpers
+##################################
+
+
+activate() {
+	ENV_NAME=$1
+	ENVS_DIR="$HOME/.myenvs"
+
+	if [ -z "$ENV_NAME" ]; then
+		echo "Usage: activate <env_name>"
+		return 1
+	fi
+
+	if [ -d "$ENVS_DIR/$ENV_NAME" ]; then
+	    # in a new zsh shell so we can deactivate exit with ctrl-d
+		zsh --rcs -c "source $ENVS_DIR/$ENV_NAME/bin/activate; exec zsh"
+	else
+		echo "Environment '$ENV_NAME' does not exist in $ENVS_DIR" > /dev/stderr
+		return 1
+	fi
+}
+
+create-env() {
+	ENV_NAME=$1
+	ENVS_DIR="$HOME/.myenvs"
+
+	if [ -z "$ENV_NAME" ]; then
+		echo "Usage: create-env <env_name>"
+		return 1
+	fi
+
+	if [ -d "$ENVS_DIR/$ENV_NAME" ]; then
+		echo "Environment '$ENV_NAME' already exists in $ENVS_DIR" > /dev/stderr
+		return 1
+	else
+		uv venv "$ENVS_DIR/$ENV_NAME"
+		if [ $? -ne 0 ]; then
+			echo "Failed to create virtual environment." > /dev/stderr
+			return 1
+		fi
+		# install some useful packages
+		uv pip install --python $ENVS_DIR/$ENV_NAME/bin/python pip ipython ruff mypy
+	fi
+}
+
+delete-env() {
+	ENV_NAME=$1
+	ENVS_DIR="$HOME/.myenvs"
+
+	if [ -z "$ENV_NAME" ]; then
+		echo "Usage: delete-env <env_name>"
+		return 1
+	fi
+
+	if [ -d "$ENVS_DIR/$ENV_NAME" ]; then
+		rm -rf "$ENVS_DIR/$ENV_NAME"
+		if [ $? -ne 0 ]; then
+			echo "Failed to delete environment '$ENV_NAME'." > /dev/stderr
+			return 1
+		fi
+	else
+		echo "Environment '$ENV_NAME' does not exist in $ENVS_DIR" > /dev/stderr
+		return 1
+	fi
+}
+
+
 # ====================================================
