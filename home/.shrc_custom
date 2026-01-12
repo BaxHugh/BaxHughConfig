@@ -143,6 +143,37 @@ function diff-dirs-names-only() {
 	find $1 -printf "%P\n" | sort | diff --color - $TMP_FILE
 }
 
+function timer() {
+	# Print the time left in minutes and seconds, updating every second
+	# and replacing the previous output line.
+	# Defaults to minutes, but accepts 'm' or 's' suffix (e.g., "30" or "30m" for minutes, "90s" for seconds)
+	local input=$1
+	local total_seconds
+	
+	if [[ $input =~ ^[0-9]+s$ ]]; then
+		# Input ends with 's', treat as seconds
+		total_seconds=${input%s}
+	elif [[ $input =~ ^[0-9]+m$ ]]; then
+		# Input ends with 'm', treat as minutes
+		total_seconds=$((${input%m} * 60))
+	elif [[ $input =~ ^[0-9]+$ ]]; then
+		# No suffix, default to minutes
+		total_seconds=$((input * 60))
+	else
+		echo "Usage: timer <number>[m|s] (defaults to minutes)"
+		return 1
+	fi
+	
+	while [ $total_seconds -gt 0 ]; do
+		local minutes=$((total_seconds / 60))
+		local seconds=$((total_seconds % 60))
+		printf "\rTime left: %02d:%02d" $minutes $seconds
+		sleep 1
+		total_seconds=$((total_seconds - 1))
+	done
+	echo -e "\nTime's up!"
+}
+
 # ====================================================
 
 # GIT
