@@ -51,11 +51,12 @@ _help() {
     echo -e "\e[1mCustom tool config files\e[0m"
     echo "These will be installed in the user's home directory."
     echo ""
-    echo '| File                  | Description                                     |'
-    echo '| --------------------- | ----------------------------------------------- |'
-    echo '| `.inputrc`            | Custom readline config                          |'
-    echo '| `.nanorc`             | Custom nano config                              |'
-    echo '| `.style.yapf`         | Custom yapf config                              |'
+    echo '| File                  | Description                                                    |'
+    echo '| --------------------- | -------------------------------------------------------------- |'
+    echo '| `.inputrc`            | Custom readline config                                         |'
+    echo '| `.nanorc`             | Custom nano config                                             |'
+    echo '| `.dircolors`          | Custom dircolors config (affects oh-my-zsh completion display) |'
+    echo '| `.style.yapf`         | Custom yapf config                                             |'
     echo ""
 }
 
@@ -185,6 +186,7 @@ append_sourcing_to_file $HOME/.profile .shenv_custom_local
 
 download_home_file_from_github .inputrc
 download_home_file_from_github .nanorc
+download_home_file_from_github .dircolors
 download_home_file_from_github .style.yapf
 
 if _omzsh_is_installed; then
