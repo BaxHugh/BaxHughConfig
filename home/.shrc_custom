@@ -202,7 +202,12 @@ function history-today() {
 # ====================================================
 function git-open-in-browser() {
 	local PAGE=$1 # i.e. "pulls" or "issues"
-	xdg-open $(git remote get-url origin | sed 's/:/\//' | sed 's/git@/https:\/\//' | sed 's/\.git//')/$PAGE
+	local url=$(git remote get-url origin)
+	# Handle SSH URLs (git@github.com:user/repo.git)
+	url=$(echo "$url" | sed 's/git@\([^:]*\):/https:\/\/\1\//')
+	# Remove .git suffix
+	url=$(echo "$url" | sed 's/\.git$//')
+	xdg-open "$url/$PAGE"
 }
 alias gitopen-in-browser="git-open-in-browser"
 
